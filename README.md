@@ -49,7 +49,7 @@ ecotrip/
 ### Prerequisites
 - Node.js 18+
 - MongoDB (local or [MongoDB Atlas](https://cloud.mongodb.com))
-- An [Anthropic API key](https://console.anthropic.com)
+- An [Groq API key](https://console.groq.com)
 
 ---
 
@@ -66,9 +66,17 @@ Edit `.env`:
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/ecotrip
 JWT_SECRET=some_long_random_string_change_this
-ANTHROPIC_API_KEY=sk-ant-...
 NODE_ENV=development
 ```
+
+### 2. Frontend Setup — Groq API Key
+
+Create `frontend/.env`:
+```env
+REACT_APP_GROQ_API_KEY=gsk_your_groq_api_key_here
+```
+
+Get your free Groq API key at: https://console.groq.com
 
 Start the server:
 ```bash
@@ -108,7 +116,7 @@ App runs at: `http://localhost:3000`
 - Accommodation preference (eco-lodge, homestay, tented camp, etc.)
 - Multi-select interest chips (Hiking, Wildlife, Wellness, Cycling, etc.)
 - Special notes
-- **AI Itinerary Generation** — streams a full eco itinerary via Anthropic API
+- **AI Itinerary Generation** — streams a full eco itinerary via Groq API
 
 ### Trip Cards (Todo-style)
 - Color-coded headers by status (planning/booked/ongoing/completed/cancelled)
@@ -182,7 +190,7 @@ Eco score (1–5) is calculated at trip creation based on:
 | Backend | Node.js, Express 4 |
 | Database | MongoDB, Mongoose |
 | Auth | JWT, bcryptjs |
-| AI | Anthropic Claude (streaming) |
+| AI | Groq LLaMA3-70B (streaming) |
 | Styling | Custom CSS (no UI library) |
 
 ---

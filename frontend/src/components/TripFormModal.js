@@ -38,34 +38,53 @@ export default function TripFormModal({ onClose }) {
     setStep('generating');
     setStreamText('');
 
-    const prompt = `You are an expert eco-travel planner for India. Create a detailed, practical eco-friendly travel itinerary:
+    const dayPlans = Array.from({ length: Number(form.days) }, (_, i) =>
+      `📅 DAY ${i + 1}\n🌅 Morning: [Specific attraction with its real name, what it is famous for, what to do]\n☀️ Afternoon: [Another specific place or activity — real name, why it is iconic]\n🌙 Evening: [Real restaurant or evening spot, local dish to order]\n💡 Tip: [One practical tip specific to this day]`
+    ).join('\n\n');
 
-Destination: ${form.destination}
-Duration: ${form.days} days | Group: ${form.members} people | Budget: ₹${form.budget}
-Departure: ${form.departureDate || 'flexible'} | Stay: ${form.accommodation || 'any eco-friendly'}
-Interests: ${selectedPrefs.length ? selectedPrefs.join(', ') : 'general eco travel'}
-Notes: ${form.notes || 'none'}
+    const prompt = `You are an expert travel planner with deep knowledge of Indian destinations. Plan a trip for ${form.members} people going to ${form.destination} for ${form.days} days from ${form.departureDate || 'soon'}. Budget: ₹${form.budget} total. Stay preference: ${form.accommodation || 'eco-friendly option'}. Interests: ${selectedPrefs.length ? selectedPrefs.join(', ') : 'general sightseeing'}. Notes: ${form.notes || 'none'}.
 
-Provide:
-1. Eco destination intro (2-3 sentences)
-2. Day-by-day itinerary (morning / afternoon / evening)
-3. Eco accommodation recommendations with approximate ₹ rates
-4. Local sustainable food spots
-5. Low-carbon transport tips (trains, buses, cycles)
-6. Budget breakdown in ₹
-7. Eco packing checklist (5-7 items)
-8. Carbon footprint reduction tips
+Write a DETAILED travel plan using ONLY real, specific place names. Follow this exact structure:
 
-Use clear headings and emojis for readability. Be warm, practical, and inspiring.`;
+---
+
+🌍 ABOUT ${form.destination.toUpperCase()}
+3-4 sentences about what makes ${form.destination} unique — its famous landmarks, culture, food, and best season to visit.
+
+---
+
+${dayPlans}
+
+---
+
+🏨 WHERE TO STAY
+Recommend 2-3 real hotels or stays in ${form.destination} that match "${form.accommodation || 'eco-friendly'}". Give real property names and approximate ₹ per night.
+
+🍽️ MUST-TRY LOCAL FOOD
+List 5 iconic dishes or food spots specific to ${form.destination} with a one-line description of each.
+
+🚌 GETTING AROUND
+Best ways to travel inside ${form.destination} — name the actual transport (auto-rickshaw, local bus, boat, cycle etc.) with rough ₹ costs.
+
+💰 BUDGET BREAKDOWN (₹${form.budget} for ${form.members} people)
+Split the budget across: Accommodation, Food, Transport, Activities, Shopping/Misc. Show per-person cost.
+
+🎒 PACKING LIST
+7 must-pack items tailored to ${form.destination} and interests: ${selectedPrefs.length ? selectedPrefs.join(', ') : 'general travel'}.
+
+Be specific and practical. Use real place names everywhere. No generic advice.`;
 
     let full = '';
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.REACT_APP_GROQ_API_KEY}`
+        },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1800,
+          model: 'llama3-70b-8192',
+          max_tokens: 4000,
           stream: true,
           messages: [{ role: 'user', content: prompt }]
         })
@@ -78,11 +97,12 @@ Use clear headings and emojis for readability. Be warm, practical, and inspiring
         if (done) break;
         const lines = dec.decode(value).split('\n');
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (line.startsWith('data: ') && line.slice(6).trim() !== '[DONE]') {
             try {
               const parsed = JSON.parse(line.slice(6));
-              if (parsed.delta?.text) {
-                full += parsed.delta.text;
+              const text = parsed.choices?.[0]?.delta?.content;
+              if (text) {
+                full += text;
                 setStreamText(full);
               }
             } catch { }
