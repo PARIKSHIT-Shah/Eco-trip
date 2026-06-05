@@ -263,13 +263,23 @@ export default function TripDetail() {
 
       {/* ── ITINERARY TAB ── */}
       {activeTab === 'itinerary' && (
-        <div className="fade-in card" style={{ padding: '1.5rem' }}>
+        <div className="fade-in">
           {trip.itinerary ? (
-            <pre style={{ fontFamily: 'inherit', fontSize: '.9rem', color: 'var(--stone-700)', whiteSpace: 'pre-wrap', lineHeight: 1.9 }}>
+            <div style={{
+              background: 'var(--green-50)',
+              border: '1.5px solid var(--green-200)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1.5rem',
+              fontFamily: 'inherit',
+              fontSize: '.88rem',
+              color: 'var(--stone-700)',
+              lineHeight: 1.9,
+              whiteSpace: 'pre-wrap'
+            }}>
               {trip.itinerary}
-            </pre>
+            </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
+            <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
               <div style={{ fontSize: '2rem', marginBottom: '.75rem' }}>📋</div>
               <p>No itinerary generated yet.</p>
             </div>
